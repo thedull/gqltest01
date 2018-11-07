@@ -29,6 +29,9 @@ namespace server
             services.AddSingleton<OrdersSchema>();
             services.AddSingleton<OrderCreateInputType>();
             services.AddSingleton<OrdersMutation>();
+            services.AddSingleton<OrdersSubscription>();
+            services.AddSingleton<OrderEventType>();
+            services.AddSingleton<IOrderEventService, OrderEventService>();
             services.AddSingleton<IDependencyResolver>(
                 c => new FuncDependencyResolver(type => c.GetRequiredService(type)));
             services.AddGraphQLHttp();
