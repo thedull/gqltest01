@@ -28,11 +28,36 @@ namespace Orders.Services
         {
             return Task.FromResult(_orders.AsEnumerable());
         }
+
+        private Order GetById(string id)
+        {
+            var order = _orders.SingleOrDefault(o => Equals(o.Id, id));
+            if (order == null)
+            {
+                throw new ArgumentException(string.Format("Order ID '{0}' is invalid", id));
+            }
+            return order;
+        }
+
+        public Task<Order> CreateAsync(Order order)
+        {
+            _orders.Add(order);
+            return Task.FromResult(order);
+        }
+
+        public Task<Order> StartAsync(string orderId)
+        {
+            var order = GetById(orderId);
+            order.Start();
+            return Task.FromResult(order);
+        }
     }    
 
     public interface IOrderService
     {
         Task<Order> GetOrderByIdAsync(string id);
         Task<IEnumerable<Order>> GetOrdersAsync();
+        Task<Order> CreateAsync(Order order);
+        Task<Order> StartAsync(string orderId);
     }
 }
