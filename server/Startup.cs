@@ -6,7 +6,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using GraphQL;
+using GraphQL.Server.Transports.AspNetCore;
+using GraphQL.Server.Transports.WebSockets;
 using Orders.Services;
+using Orders.Schema;
 
 namespace server
 {
@@ -18,6 +22,15 @@ namespace server
         {
             services.AddSingleton<IOrderService, OrderService>();
             services.AddSingleton<ICustomerService, CustomerService>();
+            services.AddSingleton<OrderType>();
+            services.AddSingleton<CustomerType>();
+            services.AddSingleton<OrderStatusesEnum>();
+            services.AddSingleton<OrdersQuery>();
+            services.AddSingleton<OrdersSchema>();
+            services.AddSingleton<IDependencyResolver>(
+                c => new FuncDependencyResolver(type => c.GetRequiredService(type)));
+            services.AddGraphQLHttp();
+            services.AddGraphQLWebSocket<OrdersSchema>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -30,6 +43,9 @@ namespace server
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
+            app.UseWebSockets();
+            app.UseGraphQLWebSocket<OrdersSchema>(new GraphQLWebSocketsOptions());
+            app.UseGraphQLHttp<OrdersSchema>(new GraphQLHttpOptions());
         }
     }
 }
